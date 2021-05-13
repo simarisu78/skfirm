@@ -64,9 +64,11 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'skfirm.pipelines.SkfirmPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'skfirm.pipelines.FirmwarePipeline': 300,
+}
+FILES_STORE = /var/firmware
+FIRMWAREPIPELINE_FILES_EXPIRES = 60
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
