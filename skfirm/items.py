@@ -1,14 +1,24 @@
 # -*- coding: utf-8 -*-
+from scrapy.item import Item, Field
 
-# Define here the models for your scraped items
-#
-# See documentation in:
-# https://docs.scrapy.org/en/latest/topics/items.html
+# scraperにしたがってDjango形式でItemを書く
+# default=Noneに意味はないです（Noneチェックはpipelines.pyで）
 
-import scrapy
+class FirmwareItem(Item):
+    category = Field(default=None)
+    vendor = Field()
+    product = Field(default=None)
 
+    description = Field(default=None)
+    version = Field(default=None)
+    date = Field(default=None)
+    size = Field(default=None)
+    language = Field(default=None)
 
-class SkfirmItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    gpl = Field(default=None)
+    url = Field()
+    mib = Field(default=None)
+
+    # Used by FilesPipeline
+    file_urls = Field()
+    files = Field()
