@@ -5,9 +5,9 @@ from scrapy.item import Item, Field
 # default=Noneに意味はないです（Noneチェックはpipelines.pyで）
 
 class FirmwareItem(Item):
-    category = Field(default=None)
+    category = Field() # if you can't find category, use "Misc"
     vendor = Field()
-    product = Field(default=None)
+    product = Field()
 
     description = Field(default=None)
     version = Field(default=None)
