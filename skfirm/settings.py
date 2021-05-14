@@ -67,7 +67,7 @@ ROBOTSTXT_OBEY = True
 ITEM_PIPELINES = {
     'skfirm.pipelines.FirmwarePipeline': 300,
 }
-FILES_STORE = /var/firmware
+FILES_STORE = "/var/firmware"
 FIRMWAREPIPELINE_FILES_EXPIRES = 60
 
 # Enable and configure the AutoThrottle extension (disabled by default)
