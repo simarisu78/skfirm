@@ -22,9 +22,6 @@ class FirmwarePipeline(FilesPipeline):
 
         super(FirmwarePipeline, self).__init__(store_uri, download_func,settings)
 
-    def test(self):
-        print("hi!")
-
     # calculate file's checksum(md5)
     # scrapy.pipelines.files - FilesPipeline - file_downloaded
     # https://github.com/scrapy/scrapy/blob/06f3d12c1208c380f9f1a16cb36ba2dfa3c244c5/scrapy/pipelines/files.py
@@ -51,7 +48,7 @@ class FirmwarePipeline(FilesPipeline):
         path = self.file_path(request, response=response, info=info, item=item)
         buf = BytesIO(response.body)
         checksum = md5sum(buf)
-        if not os.path.isfile(path):
+        if not os.path.isfile(self.store._get_filesystem_path(path)):
             buf.seek(0)
             self.store.persist_file(path, buf, info)
         return checksum
