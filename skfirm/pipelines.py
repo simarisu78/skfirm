@@ -6,10 +6,23 @@ import urllib.request, urllib.parse, urllib.error
 from scrapy.utils.misc import md5sum
 from scrapy.pipelines.files import FilesPipeline
 import logging
+from pymongo import MongoClient
 
 logger = logging.getLogger(__name__)
 
 class FirmwarePipeline(FilesPipeline):
+
+    # Called when the spider starts
+    # connect to MongoDB
+    def open_spider(self, spider):
+        self.client = MongoClient('localhost', 27017)
+        self.db = self.client['test-scrapy']
+        self.collection = self.db['items']
+
+    # Called when the spider close
+    # disconnect to MongoDB
+    def close_spider(self, spider):
+        self.client.close()
 
     # calculate file's checksum(md5)
     # scrapy.pipelines.files - FilesPipeline - file_downloaded
@@ -41,3 +54,23 @@ class FirmwarePipeline(FilesPipeline):
             buf.seek(0)
             self.store.persist_file(path, buf, info)
         return checksum
+
+    # overrides function from FilesPipeline
+    def item_completed(self, results, item, info):
+        item['files'] = []
+        if isinstance(item, dict) or files in item.fields:
+            item['files'] = [x for ok, x in results if ok]
+
+"""
+mongoDB 4.0以降じゃないとトランザクション処理ができません！！！！
+なのでとりあえずエラー処理は後回し
+"""
+        #s = client.start_session()
+        if self.client:
+            try:
+                copy = item.deepcopy()
+                self.collection.insert_one(dict(copy))
+                return items
+            except BaseException as e:
+                logger.critical("Database connection exception!: $s" %e)
+                raise
