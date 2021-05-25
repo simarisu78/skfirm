@@ -32,7 +32,7 @@ class BuffaloSpider(Spider):
 
                 item.add_value("version", version)
                 item.add_value("description", description)
-                item.add_value("file_urls", "https://www.buffalotech.com/products/airstation-highpower-n300-open-source-dd-wrt-wireless-router")
+                item.add_value("file_urls", "https://dd00b71c8b1dfd11ad96-382cb7eb4238b9ee1c11c6780d1d2d1e.ssl.cf1.rackcdn.com/whr300hp2d-r30357.zip")
                 item.add_value("product", product)
                 item.add_value("vendor", self.name)
                 yield item.load_item()

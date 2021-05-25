@@ -15,6 +15,7 @@ class FirmwarePipeline(FilesPipeline):
     # Called when the spider starts
     # connect to MongoDB
     def open_spider(self, spider):
+        logger.info("open_spider")
         self.client = MongoClient('localhost', 27017)
         self.db = self.client['test-scrapy']
         self.collection = self.db['items']
@@ -57,6 +58,7 @@ class FirmwarePipeline(FilesPipeline):
 
    # overrides function from FilesPipeline
     def get_media_requests(self, item, info):
+        logger.info("media_requests")
         # check for mandatory fields
         for x in ["vendor", "url"]:
             if x not in item:
@@ -87,10 +89,11 @@ class FirmwarePipeline(FilesPipeline):
                                        for x in ["mib", "url"] if x in item]
 
         # pass vendor so we can generate the correct file path and name
-        return [Request(x, meta={"ftp_user": "anonymous", "ftp_password": "chrome@example.com", "vendor": item["vendor"]}) for x in item[self.files_urls_field]]
+        return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
 
     # overrides function from FilesPipeline
     def item_completed(self, results, item, info):
+        logger.info("item_completed")
         item['files'] = []
         if isinstance(item, dict) or files in item.fields:
             item['files'] = [x for ok, x in results if ok]
