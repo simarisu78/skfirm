@@ -68,7 +68,7 @@ ITEM_PIPELINES = {
     'skfirm.pipelines.FirmwarePipeline': 300,
 }
 FILES_STORE = "/var/firmware"
-FIRMWAREPIPELINE_FILES_EXPIRES = 60
+FILES_EXPIRES = 30
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
