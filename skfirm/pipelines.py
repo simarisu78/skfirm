@@ -2,25 +2,14 @@
 
 import os
 from io import BytesIO
-
 import urllib.request, urllib.parse, urllib.error
-
 from scrapy.utils.misc import md5sum
 from scrapy.pipelines.files import FilesPipeline
+import logging
+
+logger = logging.getLogger(__name__)
 
 class FirmwarePipeline(FilesPipeline):
-
-    # overrides initial function from FilesPipeline
-    def __init__(self, store_uri, download_func=None, settings=None):
-        if settings and "SQL_SERVER" in settings:
-            import psycopg2
-            self.database = psycopg2.connect(database="firmware", user="firmadyne",
-                                             password="firmadyne", host=settings["SQL_SERVER"],
-                                             port=5432)
-        else:
-            self.database = None
-
-        super(FirmwarePipeline, self).__init__(store_uri, download_func,settings)
 
     # calculate file's checksum(md5)
     # scrapy.pipelines.files - FilesPipeline - file_downloaded
