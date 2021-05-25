@@ -58,7 +58,7 @@ class FirmwarePipeline(FilesPipeline):
 
    # overrides function from FilesPipeline
     def get_media_requests(self, item, info):
-        logger.info("media_requests")
+        logger.info("get_media_requests")
         # check for mandatory fields
         for x in ["vendor", "url"]:
             if x not in item:
@@ -66,7 +66,7 @@ class FirmwarePipeline(FilesPipeline):
                     "Missing required field '%s' for item: " % x)
 
         # resolve dynamic redirects in urls
-        for x in ["mib", "sdk", "url"]:
+        for x in ["mib", "gpl", "url"]:
             if x in item:
                 split = urllib.parse.urlsplit(item[x])
                 # remove username/password if only one provided
@@ -81,12 +81,11 @@ class FirmwarePipeline(FilesPipeline):
         url = urllib.parse.urlparse(item["url"])
         if any(url.path.endswith(x) for x in [".pdf", ".php", ".txt", ".doc", ".rtf", ".docx", ".htm", ".html", ".md5", ".sha1", ".torrent"]):
             raise DropItem("Filtered path extension: %s" % url.path)
-        elif any(x in url.path for x in ["driver", "utility", "install", "wizard", "gpl", "login"]):
+        elif any(x in url.path for x in ["driver", "utility", "install", "wizard", "login"]):
             raise DropItem("Filtered path type: %s" % url.path)
 
         # generate list of url's to download
-        item[self.files_urls_field] = [item[x]
-                                       for x in ["mib", "url"] if x in item]
+        item['file_urls'] = [item[x] for x in ["mib", "url", "gpl"] if x in item]
 
         # pass vendor so we can generate the correct file path and name
         return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
