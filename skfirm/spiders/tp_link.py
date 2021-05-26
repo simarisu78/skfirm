@@ -7,7 +7,7 @@ from itemloaders.processors import Identity, MapCompose, TakeFirst
 class TpLinkSpider(scrapy.Spider):
     name = 'tp-link'
     vendor = 'tp-link'
-    allowed_domains = ['www.tp-link.com']
+    #allowed_domains = ['www.tp-link.com']
     start_urls = ['https://www.tp-link.com/jp/support/download/']
 
     def parse(self, response):
