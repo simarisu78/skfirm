@@ -95,6 +95,7 @@ class FirmwarePipeline(FilesPipeline):
         # pass vendor so we can generate the correct file path and name
         #return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
         for file_url in item['file_urls']:
+            logger.debug("file_url: %s " % file_url)
             yield Request(file_url, meta={"vendor": item["vendor"]})
 
     # overrides function from FilesPipeline
