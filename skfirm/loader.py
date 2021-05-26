@@ -72,6 +72,7 @@ class FirmwareLoader(ItemLoader):
     version_in = MapCompose(clean)
     build_in = MapCompose(clean)
     date_in = MapCompose(clean, parse_date)
+    donwaloadDate_in = MapCompose(clean, parse_date)
 
     mib_in = MapCompose(fix_url)
     gpl_in = MapCompose(fix_url)

@@ -12,6 +12,7 @@ class FirmwareItem(Item):
     description = Field(default=None)
     version = Field(default=None)
     date = Field(default=None)
+    downloadDate = Field(default=None)
     size = Field(default=None)
     language = Field(default=None)
 
