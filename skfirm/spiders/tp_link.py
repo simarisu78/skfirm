@@ -1,5 +1,8 @@
 import scrapy
 import re
+from skfirm.items import FirmwareItem
+from skfirm.loader import FirmwareLoader
+from itemloaders.processors import Identity, MapCompose, TakeFirst
 
 class TpLinkSpider(scrapy.Spider):
     name = 'tp-link'
@@ -23,11 +26,11 @@ class TpLinkSpider(scrapy.Spider):
         self.logger.debug("%s %s : %d binary firmware found." % (response.meta["category"], response.meta["product"], len(tables)))
 
         for firmware in tables:
-            reg_version = re.search(r'_(V.+)_',text)
+            reg_version = re.search(r'_(V.+)_',firmware.xpath(".//a/text()").get())
             spans = firmware.xpath(".//tr[@class='detail-info']/td/span/text()")
-            item = FirmwareLoader(item=FirmwareImage(), response=response, date_fmt=["%y-%m-%d"])
+            item = FirmwareLoader(item=FirmwareItem(), response=response, date_fmt=["%y-%m-%d"],description_in = Identity())
             item.add_value("vendor", self.vendor)
-            item.add_value("url", firmware.xpath(".//a/@href").get().strip())
+            item.add_value("url", firmware.xpath(".//a/@href").get())
             item.add_value("date", spans[1].get().strip())
             item.add_value("language", spans[3].get().strip())
             item.add_value("size", spans[5].get().strip())
