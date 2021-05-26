@@ -1,4 +1,5 @@
 import scrapy
+import re
 
 class TpLinkSpider(scrapy.Spider):
     name = 'tp-link'
