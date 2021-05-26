@@ -101,6 +101,7 @@ class FirmwarePipeline(FilesPipeline):
     # overrides function from FilesPipeline
     def item_completed(self, results, item, info):
         logger.debug("item_completed")
+        logger.debug(results)
         item['files'] = []
         if isinstance(item, dict) or 'files' in item.fields:
             item['files'] = [x for ok, x in results if ok]
