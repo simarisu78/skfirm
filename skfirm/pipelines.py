@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from scrapy.exceptions import DropItem
+from scrapy.http import Request
 import os
 from io import BytesIO
 import urllib.request, urllib.parse, urllib.error
@@ -15,6 +17,7 @@ class FirmwarePipeline(FilesPipeline):
     # Called when the spider starts
     # connect to MongoDB
     def open_spider(self, spider):
+        self.spiderinfo = self.SpiderInfo(spider)
         logger.info("open_spider")
         self.client = MongoClient('localhost', 27017)
         self.db = self.client['test-scrapy']
@@ -54,6 +57,7 @@ class FirmwarePipeline(FilesPipeline):
         if not os.path.isfile(self.store._get_filesystem_path(path)):
             buf.seek(0)
             self.store.persist_file(path, buf, info)
+        logger.debug("file_path : %s" % path)
         return checksum
 
    # overrides function from FilesPipeline
@@ -94,7 +98,7 @@ class FirmwarePipeline(FilesPipeline):
     def item_completed(self, results, item, info):
         logger.info("item_completed")
         item['files'] = []
-        if isinstance(item, dict) or files in item.fields:
+        if isinstance(item, dict) or 'files' in item.fields:
             item['files'] = [x for ok, x in results if ok]
 
         """
@@ -105,7 +109,7 @@ class FirmwarePipeline(FilesPipeline):
             try:
                 copy = item.deepcopy()
                 self.collection.insert_one(dict(copy))
-                return items
+                return item
             except BaseException as e:
-                logger.critical("Database connection exception!: $s" %e)
+                logger.critical("Database connection exception!: %s" %e)
                 raise
