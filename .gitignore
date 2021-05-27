@@ -2,3 +2,4 @@ skfirm/__pycache__
 skfirm/spiders/__pycache__
 temp/*
 skfirm/test.py
+.scrapy/
