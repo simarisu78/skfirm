@@ -28,6 +28,7 @@ ROBOTSTXT_OBEY = True
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 DOWNLOAD_DELAY = 3
+CONCURRENT_REQUESTS = 1
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -67,7 +68,8 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 1
 ITEM_PIPELINES = {
     'skfirm.pipelines.FirmwarePipeline': 300,
 }
-FILES_STORE = "/var/firmware"
+#FILES_STORE = "/var/firmware"
+FILES_STORE = "dls"
 FILES_EXPIRES = 30
 
 # Enable and configure the AutoThrottle extension (disabled by default)
