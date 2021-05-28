@@ -42,7 +42,7 @@ class FirmwarePipeline(FilesPipeline):
         # vendor/category/productname/version_date[_number].zip .bin (etc)
         # If the file already exists and has a different hash, add a number to the end of the file name.
         parsed_url = urllib.parse.urlparse(urllib.parse.unquote(request.url)).path
-        filename = parsed_url[parsed_url.rfind() + 1:]
+        filename = parsed_url[parsed_url.rfind("/") + 1:]
         return "%s/%s/%s/%s" % (item.get('vendor'), item.get('category'),item.get('product'), filename)
 
     # overrides function from FilesPipeline
