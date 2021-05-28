@@ -9,6 +9,7 @@ from scrapy.utils.misc import md5sum
 from scrapy.pipelines.files import FilesPipeline
 import logging
 from pymongo import MongoClient
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -37,24 +38,29 @@ class FirmwarePipeline(FilesPipeline):
         return checksum
 
     # overrides fuction from FilesPipeline
-    def file_path(self, request, response, info=None, *, item):
-        extension = os.path.splitext(os.path.basename(
-            urllib.parse.urlsplit(request.url).path))[1]
-        # vendor/category/productname/version_date_checksum.zip .bin (etc)
-        # if spiders can't find version, file name is only a checksum.
-        if item.get('version') is None:
-            item['version'] = "v1"
-        if item.get('date') is None:
-            item['date'] = "0000"
-        return "%s/%s/%s/%s_%s_%s%s" % (item.get('vendor'), item.get('category'),
-                item.get('product'), item.get('version'), item.get('date'), self.get_md5sum(response), extension)
+    def file_path(self, request, response=None, info=None, *, item):
+        # vendor/category/productname/version_date[_number].zip .bin (etc)
+        # If the file already exists and has a different hash, add a number to the end of the file name.
+        parsed_url = urllib.parse.urlparse(urllib.parse.unquote(request.url)).path
+        filename = parsed_url[parsed_url.rfind() + 1:]
+        return "%s/%s/%s/%s" % (item.get('vendor'), item.get('category'),item.get('product'), filename)
 
     # overrides function from FilesPipeline
     def file_downloaded(self, response, request, info, *, item=None):
         path = self.file_path(request, response=response, info=info, item=item)
         buf = BytesIO(response.body)
         checksum = md5sum(buf)
-        if not os.path.isfile(self.store._get_filesystem_path(path)):
+
+        # そのうち英訳します
+        # データベースに同じハッシュがあるかチェックし、あればファイル保存を見送るようにする
+        if self.client:
+            try:
+                ret = collection.count_documents(filter={'vendor':'tp-link', 'checksum':checksum})
+            except BaseException as e:
+                logger.critical("Database connection exception!: %s" %e)
+                raise
+
+        if not os.path.isfile(self.store._get_filesystem_path(path)) and ret==0:
             buf.seek(0)
             self.store.persist_file(path, buf, info)
         logger.debug("file_path : %s" % path)
@@ -96,6 +102,7 @@ class FirmwarePipeline(FilesPipeline):
         #return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
         for file_url in item['file_urls']:
             logger.debug("file_url: %s " % file_url)
+            time.sleep(20)
             yield Request(file_url, meta={"vendor": item["vendor"]})
 
     # overrides function from FilesPipeline
