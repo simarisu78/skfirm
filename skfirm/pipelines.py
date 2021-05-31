@@ -41,9 +41,15 @@ class FirmwarePipeline(FilesPipeline):
     def file_path(self, request, response=None, info=None, *, item):
         # vendor/category/productname/version_date[_number].zip .bin (etc)
         # If the file already exists and has a different hash, add a number to the end of the file name.
+
+        if item.get('version') is None:
+            item['version'] = "v1"
+        if item.get('date') is None:
+            item['date'] = "0000"
+        
         parsed_url = urllib.parse.urlparse(urllib.parse.unquote(request.url)).path
         filename = parsed_url[parsed_url.rfind("/") + 1:]
-        return "%s/%s/%s/%s" % (item.get('vendor'), item.get('category'),item.get('product'), filename)
+        return "%s/%s/%s/%s_%s/%s" % (item.get('vendor'), item.get('category'),item.get('product'), item.get('version'), item.get('date'), filename)
 
     # overrides function from FilesPipeline
     def file_downloaded(self, response, request, info, *, item=None):
@@ -55,15 +61,18 @@ class FirmwarePipeline(FilesPipeline):
         # データベースに同じハッシュがあるかチェックし、あればファイル保存を見送るようにする
         if self.client:
             try:
-                ret = collection.count_documents(filter={'vendor':'tp-link', 'checksum':checksum})
+                ret = self.collection.count_documents(filter={'vendor':item.get('vendor'), 'checksum':checksum})
             except BaseException as e:
                 logger.critical("Database connection exception!: %s" %e)
                 raise
 
-        if not os.path.isfile(self.store._get_filesystem_path(path)) and ret==0:
+        first = path[0:path.rfind("/")+1]
+        end = path[path.rfind("/")+1:]
+        checksum_path = first+checksum+"_"+end
+        if not os.path.isfile(self.store._get_filesystem_path(checksum_path)) and ret==0:
+            logger.debug("checksum not found! persist file %s" % checksum_path)
             buf.seek(0)
-            self.store.persist_file(path, buf, info)
-        logger.debug("file_path : %s" % path)
+            self.store.persist_file(checksum_path, buf, info)
         return checksum
 
    # overrides function from FilesPipeline
@@ -102,7 +111,6 @@ class FirmwarePipeline(FilesPipeline):
         #return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
         for file_url in item['file_urls']:
             logger.debug("file_url: %s " % file_url)
-            time.sleep(20)
             yield Request(file_url, meta={"vendor": item["vendor"]})
 
     # overrides function from FilesPipeline
@@ -118,7 +126,7 @@ class FirmwarePipeline(FilesPipeline):
         なのでとりあえずエラー処理は後回し
         """
         if self.client:
-            try:
+            try: 
                 copy = item.deepcopy()
                 self.collection.insert_one(dict(copy))
                 return item
