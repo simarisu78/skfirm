@@ -55,7 +55,8 @@ class FirmwareLoader(ItemLoader):
     def parse_date(date, loader_context):
         for fmt in loader_context.get("date_fmt", []):
             try:
-                return datetime.datetime.strptime(date, fmt)
+                dateObject = datetime.datetime.strptime(date, fmt)
+                return dateObject.strftime('%Y-%m-%d')
             except ValueError:
                 pass
         return None
