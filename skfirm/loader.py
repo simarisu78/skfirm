@@ -62,7 +62,7 @@ class FirmwareLoader(ItemLoader):
         return None
 
     def remove_html(s):
-        return re.sub(r"<[a-zA-Z0-9\"/=: ]+>", "", s)
+        return re.sub(r"<[a-zA-Z0-9\"/=: -.]+>", "", s)
 
     default_output_processor = TakeFirst()
 
