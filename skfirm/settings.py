@@ -14,6 +14,12 @@ BOT_NAME = 'skfirm'
 SPIDER_MODULES = ['skfirm.spiders']
 NEWSPIDER_MODULE = 'skfirm.spiders'
 
+#LOG_LEVEL = 'INFO'
+
+# FIFOへ変更
+DEPTH_PRIORITY = 1
+SCHEDULER_DISK_QUEUE = 'scrapy.squeues.PickleFifoDiskQueue'
+SCHEDULER_MEMORY_QUEUE = 'scrapy.squeues.FifoMemoryQueue'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'skfirm (+http://www.yourdomain.com)'
@@ -69,8 +75,9 @@ ITEM_PIPELINES = {
     'skfirm.pipelines.FirmwarePipeline': 300,
 }
 #FILES_STORE = "/var/firmware"
-FILES_STORE = "dls"
-FILES_EXPIRES = 30
+#FILES_STORE = "dls"
+FILES_STORE = "/home/kawanishi@SSN/research/firmware-DL/skfirm/result"
+FILES_EXPIRES = 0
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -88,7 +95,10 @@ FILES_EXPIRES = 30
 # Enable and configure HTTP caching (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
 HTTPCACHE_ENABLED = True
-HTTPCACHE_EXPIRATION_SECS = 180
+HTTPCACHE_EXPIRATION_SECS = 0
 HTTPCACHE_DIR = 'httpcache'
 HTTPCACHE_IGNORE_HTTP_CODES = []
 HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+# settings of scrapy-splash
+#SPLASH_URL = 'http://localhost:8050'
