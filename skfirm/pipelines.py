@@ -49,6 +49,8 @@ class FirmwarePipeline(FilesPipeline):
         
         parsed_url = urllib.parse.urlparse(urllib.parse.unquote(request.url)).path
         filename = parsed_url[parsed_url.rfind("/") + 1:]
+        if request.meta.get("isGpl"):
+            return "%s/%s/%s/gpl/%s/%s/" % (item.get('vendor'), item.get('category'),item.get('product'), item.get('version'), filename)
         return "%s/%s/%s/%s_%s/%s" % (item.get('vendor'), item.get('category'),item.get('product'), item.get('version'), item.get('date'), filename)
 
     # overrides function from FilesPipeline
@@ -106,17 +108,20 @@ class FirmwarePipeline(FilesPipeline):
         # generate list of url's to download
         item['file_urls'] = [item[x] for x in ["mib", "url", "gpl"] if x in item]
 
-        logger.debug(item['file_urls'])
+        #logger.debug(item['file_urls'])
         # pass vendor so we can generate the correct file path and name
         #return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
+        #メタ情報の充実のため、実際には一つのアイテムには一つのurlもしくはgplしか入っていない
+        #念の為残すが、可読性のために消すかも
         for file_url in item['file_urls']:
-            logger.debug("file_url: %s " % file_url)
+            if item['gpl'] is not None:
+                yield Request(file_url, meta={"vendor": item["vendor"], "isGpl":True})
+            logger.info("Downloading from ... : %s " % file_url)
             yield Request(file_url, meta={"vendor": item["vendor"]})
 
     # overrides function from FilesPipeline
     def item_completed(self, results, item, info):
         logger.debug("item_completed")
-        logger.debug(results)
         item['files'] = []
         if isinstance(item, dict) or 'files' in item.fields:
             item['files'] = [x for ok, x in results if ok]
