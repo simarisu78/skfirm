@@ -50,7 +50,7 @@ class FirmwarePipeline(FilesPipeline):
         parsed_url = urllib.parse.urlparse(urllib.parse.unquote(request.url)).path
         filename = parsed_url[parsed_url.rfind("/") + 1:]
         if request.meta.get("isGpl"):
-            return "%s/%s/%s/gpl/%s/%s/" % (item.get('vendor'), item.get('category'),item.get('product'), item.get('version'), filename)
+            return "%s/%s/%s/gpl/%s/%s" % (item.get('vendor'), item.get('category'),item.get('product'), item.get('version'), filename)
         return "%s/%s/%s/%s_%s/%s" % (item.get('vendor'), item.get('category'),item.get('product'), item.get('version'), item.get('date'), filename)
 
     # overrides function from FilesPipeline
@@ -79,13 +79,13 @@ class FirmwarePipeline(FilesPipeline):
 
    # overrides function from FilesPipeline
     def get_media_requests(self, item, info):
-        logger.debug("get_media_requests")
         # check for mandatory fields
-        for x in ["vendor", "url"]:
+        for x in ["vendor"]:
             if x not in item:
                 raise DropItem(
                     "Missing required field '%s' for item: " % x)
-
+            
+            
         # resolve dynamic redirects in urls
         for x in ["mib", "gpl", "url"]:
             if x in item:
@@ -97,27 +97,31 @@ class FirmwarePipeline(FilesPipeline):
 
                 if split.scheme == "http":
                     item[x] = urllib.request.urlopen(item[x]).geturl()
-
+                    
         # check for filtered url types in path
-        url = urllib.parse.urlparse(item["url"])
+        if "url" in item:
+            url = urllib.parse.urlparse(item["url"])
+        elif "gpl" in item:
+            url = urllib.parse.urlparse(item["gpl"])
+        
         if any(url.path.endswith(x) for x in [".pdf", ".php", ".txt", ".doc", ".rtf", ".docx", ".htm", ".html", ".md5", ".sha1", ".torrent"]):
             raise DropItem("Filtered path extension: %s" % url.path)
         elif any(x in url.path for x in ["driver", "utility", "install", "wizard", "login"]):
             raise DropItem("Filtered path type: %s" % url.path)
 
-        # generate list of url's to download
+        # generate list of url's to download                                                                                     
         item['file_urls'] = [item[x] for x in ["mib", "url", "gpl"] if x in item]
-
-        #logger.debug(item['file_urls'])
+        
+        logger.debug(item['file_urls'])
         # pass vendor so we can generate the correct file path and name
         #return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
         #メタ情報の充実のため、実際には一つのアイテムには一つのurlもしくはgplしか入っていない
         #念の為残すが、可読性のために消すかも
         for file_url in item['file_urls']:
-            if item['gpl'] is not None:
-                yield Request(file_url, meta={"vendor": item["vendor"], "isGpl":True})
-            logger.info("Downloading from ... : %s " % file_url)
-            yield Request(file_url, meta={"vendor": item["vendor"]})
+            if "gpl" in item:
+                yield Request(file_url, meta={"vendor": item["vendor"], "isGpl":True, "isFile":True})
+                continue
+            yield Request(file_url, meta={"vendor": item["vendor"], "isFile":True})
 
     # overrides function from FilesPipeline
     def item_completed(self, results, item, info):
