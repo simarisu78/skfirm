@@ -13,9 +13,9 @@ class TpLinkSpider(scrapy.Spider):
     item_lists = []
     count = 0
 
-    ustom_settings = {
-        'DUPEFILTER_CLASS': 'scrapy.dupefilters.BaseDupeFilter',
-    }
+    #ustom_settings = {
+    #    'DUPEFILTER_CLASS': 'scrapy.dupefilters.BaseDupeFilter',
+    #}
     
     def parse(self, response):
         product_types = response.xpath("//div[@class='item']")
@@ -39,11 +39,9 @@ class TpLinkSpider(scrapy.Spider):
             if i == len(hardWareVer)-1:
                 #print(response.meta.get("isLast"))
                 if response.meta.get("isLast"):
-                    print("Taken!                         : %s \n\n\n\n\n" % hwVer)
                     yield scrapy.Request(hwVer, meta={"isLast":True, "category": category, "product":model}, callback=self.parse_product)
                     return
                 else:
-                    #print("Not Taken!                         : %s \n\n\n" % hwVer)
                     yield response.follow(hwVer, meta={"category": category, "product":model}, callback=self.parse_product)
                     return
             else:
@@ -53,8 +51,6 @@ class TpLinkSpider(scrapy.Spider):
                 
     def parse_product(self, response):
         self.logger.info("Parsing %s..." % response.url)
-        self.logger.info("meta: %s" % response.meta)
-        TpLinkSpider.count += 1
         tables = response.xpath("//div[@id='content_Firmware']/table")
         self.logger.info("%s %s : %d binary firmware found." % (response.meta["category"], response.meta["product"], len(tables)))
         
@@ -72,6 +68,7 @@ class TpLinkSpider(scrapy.Spider):
             item.add_value("category", response.meta["category"])
             if reg_version is not None:
                 item.add_value("version", reg_version.groups()[0])
+#            yield item.load_item()
             TpLinkSpider.item_lists.append(item.load_item())
 
         gpl_source_codes = response.xpath("//div[@id='content_GPL-Code']/.//a")
@@ -81,12 +78,13 @@ class TpLinkSpider(scrapy.Spider):
             item = FirmwareLoader(
             item=FirmwareItem(), response=response, date_fmt=["%Y-%m-%d"])
             item.add_value("vendor", self.vendor)
-            item.add_value("gpl", gpl.xpath("./@href").get())
+            item.add_value("gpl", gpl.xpath("./@href").get().strip())
             item.add_value("product", response.meta["product"])
             item.add_value("category", response.meta["category"])
             gpl_ver = re.search("(V.?)", gpl.xpath("./text()").get())
             if gpl_ver is not None:
                 item.add_value("version", gpl_ver.groups()[0])
+#            yield item.load_item()
             TpLinkSpider.item_lists.append(item.load_item())
 
         if response.meta.get("isLast"):
@@ -94,6 +92,3 @@ class TpLinkSpider(scrapy.Spider):
             self.logger.info("files! : %d" % len(TpLinkSpider.item_lists))
             for itm in TpLinkSpider.item_lists:
                 yield itm
-                #time.sleep(90)
-                #AutoThrottleの変更で対応する
-                #sleepだと全体の処理が止まってしまうのでダメです
