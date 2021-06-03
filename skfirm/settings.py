@@ -33,7 +33,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 5
 CONCURRENT_REQUESTS = 1
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 1
@@ -65,9 +65,13 @@ CONCURRENT_REQUESTS_PER_DOMAIN = 1
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+EXTENSIONS = {
+    'scrapy.extensions.throttle.AutoThrottle' : None,
+    'skfirm.fileThrottle.FileThrottle' : 0,
+}
+
+FILETHROTTLE_ENABLED = True
+FILE_DELAY = 90
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
