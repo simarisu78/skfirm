@@ -46,7 +46,7 @@ class FirmwarePipeline(FilesPipeline):
             item['version'] = "v1"
         if item.get('date') is None:
             item['date'] = "0000"
-        
+
         parsed_url = urllib.parse.urlparse(urllib.parse.unquote(request.url)).path
         filename = parsed_url[parsed_url.rfind("/") + 1:]
         if request.meta.get("isGpl"):
@@ -84,8 +84,8 @@ class FirmwarePipeline(FilesPipeline):
             if x not in item:
                 raise DropItem(
                     "Missing required field '%s' for item: " % x)
-            
-            
+
+
         # resolve dynamic redirects in urls
         for x in ["mib", "gpl", "url"]:
             if x in item:
@@ -97,22 +97,22 @@ class FirmwarePipeline(FilesPipeline):
 
                 if split.scheme == "http":
                     item[x] = urllib.request.urlopen(item[x]).geturl()
-                    
+
         # check for filtered url types in path
         if "url" in item:
             url = urllib.parse.urlparse(item["url"])
         elif "gpl" in item:
             url = urllib.parse.urlparse(item["gpl"])
-        
+
         if any(url.path.endswith(x) for x in [".pdf", ".php", ".txt", ".doc", ".rtf", ".docx", ".htm", ".html", ".md5", ".sha1", ".torrent"]):
             raise DropItem("Filtered path extension: %s" % url.path)
         elif any(x in url.path for x in ["driver", "utility", "install", "wizard", "login"]):
             raise DropItem("Filtered path type: %s" % url.path)
 
-        # generate list of url's to download                                                                                     
+        # generate list of url's to download
         item['file_urls'] = [item[x] for x in ["mib", "url", "gpl"] if x in item]
-        
-        logger.debug(item['file_urls'])
+
+        #logger.debug(item['file_urls'])
         # pass vendor so we can generate the correct file path and name
         #return [Request(x, meta={"vendor": item["vendor"]}) for x in item['file_urls']]
         #メタ情報の充実のため、実際には一つのアイテムには一つのurlもしくはgplしか入っていない
@@ -125,7 +125,6 @@ class FirmwarePipeline(FilesPipeline):
 
     # overrides function from FilesPipeline
     def item_completed(self, results, item, info):
-        logger.debug("item_completed")
         item['files'] = []
         if isinstance(item, dict) or 'files' in item.fields:
             item['files'] = [x for ok, x in results if ok]
@@ -135,7 +134,7 @@ class FirmwarePipeline(FilesPipeline):
         なのでとりあえずエラー処理は後回し
         """
         if self.client:
-            try: 
+            try:
                 copy = item.deepcopy()
                 self.collection.insert_one(dict(copy))
                 return item
