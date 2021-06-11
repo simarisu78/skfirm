@@ -78,10 +78,8 @@ FILE_DELAY = 90
 ITEM_PIPELINES = {
     'skfirm.pipelines.FirmwarePipeline': 300,
 }
-#FILES_STORE = "/var/firmware"
-#FILES_STORE = "dls"
-FILES_STORE = "/home/kawanishi@SSN/research/firmware-DL/skfirm/result"
-FILES_EXPIRES = 0
+FILES_STORE = "/var/firmware"
+FILES_EXPIRES = 25
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
