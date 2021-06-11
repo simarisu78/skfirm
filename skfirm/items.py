@@ -15,6 +15,7 @@ class FirmwareItem(Item):
     downloadDate = Field(default=None)
     size = Field(default=None)
     language = Field(default=None)
+    build = Field(default=None)
 
     gpl = Field(default=None)
     url = Field()
