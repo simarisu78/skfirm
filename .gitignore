@@ -3,3 +3,4 @@ skfirm/spiders/__pycache__
 temp/*
 skfirm/test.py
 .scrapy/
+githubcpy.sh
