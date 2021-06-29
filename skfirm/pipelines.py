@@ -21,7 +21,7 @@ class FirmwarePipeline(FilesPipeline):
         self.spiderinfo = self.SpiderInfo(spider)
         logger.debug("open_spider")
         self.client = MongoClient('localhost', 27017)
-        self.db = self.client['test-scrapy']
+        self.db = self.client['firmware']
         self.collection = self.db['items']
 
     # Called when the spider close
@@ -129,12 +129,18 @@ class FirmwarePipeline(FilesPipeline):
         if isinstance(item, dict) or 'files' in item.fields:
             item['files'] = [x for ok, x in results if ok]
 
-        """
-        mongoDB 4.0以降じゃないとトランザクション処理ができません！！！！
-        なのでとりあえずエラー処理は後回し
-        """
+        item['checksum'] = item['files'][0]['checksum']
+        del item['files']
+        del item['file_urls']
+        
         if self.client:
             try:
+                search_count = self.collection.count_documents({"checksum":item['checksum']})
+                if(search_count != 0):
+                    logger.debug("firmware was already downloaded. : %s" % item['checksum'])
+                    return
+
+                logger.debug("firmware is not downloaded")
                 copy = item.deepcopy()
                 self.collection.insert_one(dict(copy))
                 return item
