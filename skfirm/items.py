@@ -24,3 +24,4 @@ class FirmwareItem(Item):
     # Used by FilesPipeline
     file_urls = Field()
     files = Field()
+    checksum = Field()
